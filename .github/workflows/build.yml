@@ -1,0 +1,50 @@
+name: build
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install lz4 zstandard pytest
+      - run: pip install -e . --no-deps
+      - run: pytest -q
+
+  package:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: BG3SaveEditor-windows
+          - os: macos-latest
+            artifact: BG3SaveEditor-macos
+          - os: ubuntu-latest
+            artifact: BG3SaveEditor-linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - name: Install GTK/WebKit (Linux only)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-gi python3-gi-cairo gir1.2-gtk-3.0 \
+                                  gir1.2-webkit2-4.1 libcairo2-dev libgirepository1.0-dev
+
+      - run: pip install -e .[dev]
+      - run: pyinstaller packaging/bgse.spec --noconfirm
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/

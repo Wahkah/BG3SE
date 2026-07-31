@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bgse"
+version = "0.1.0"
+description = "Baldur's Gate 3 save editor - cross-platform (Windows, macOS, Linux)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+dependencies = [
+    "lz4>=4.3",
+    "zstandard>=0.22",
+    "pywebview>=5.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pyinstaller>=6.6"]
+
+[project.scripts]
+bgse = "bgse.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+bgse = ["ui/*.html", "ui/*.css", "ui/*.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

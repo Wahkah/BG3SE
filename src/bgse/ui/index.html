@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BG3 Save Editor</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand">
+    <span class="logo">&#9670;</span>
+    <span class="brand-text">Baldur's Gate 3 <b>Save Editor</b></span>
+  </div>
+  <div id="openInfo" class="open-info hidden">
+    <span id="openName"></span>
+    <span id="dirtyDot" class="dirty hidden" title="unsaved changes"></span>
+  </div>
+  <div class="actions">
+    <button id="btnBack" class="ghost hidden">&#8592; Saves</button>
+    <label class="chk" id="backupWrap"><input type="checkbox" id="chkBackup" checked> Back up first</label>
+    <button id="btnSave" class="primary hidden" disabled>Write save</button>
+  </div>
+</header>
+
+<!-- ------------------------------------------------------ save picker -->
+<section id="picker" class="screen">
+  <div class="picker-head">
+    <h1>Choose a savegame</h1>
+    <div class="row">
+      <input id="saveFilter" type="search" placeholder="Filter by name&hellip;">
+      <button id="btnRescan" class="ghost">Rescan</button>
+      <button id="btnEnv" class="ghost">Where is it looking?</button>
+    </div>
+  </div>
+  <div id="envBox" class="env hidden"></div>
+  <div id="saveGrid" class="grid"></div>
+  <div id="pickerEmpty" class="empty hidden"></div>
+</section>
+
+<!-- ---------------------------------------------------------- editor -->
+<section id="editor" class="screen hidden">
+  <nav class="tabs">
+    <button class="tab active" data-tab="party">Party</button>
+    <button class="tab" data-tab="components">Components</button>
+    <button class="tab" data-tab="tree">Raw tree</button>
+    <button class="tab" data-tab="files">Files</button>
+  </nav>
+
+  <!-- party -->
+  <div class="pane active" id="pane-party">
+    <div class="pane-inner">
+      <div class="card">
+        <h2>Savegame</h2>
+        <div class="field-row">
+          <label>Save name</label>
+          <input id="fSaveName" type="text">
+          <button id="btnSaveName" class="ghost small">Apply</button>
+        </div>
+        <dl id="saveMeta" class="meta"></dl>
+      </div>
+      <h2 class="section-title">Party members</h2>
+      <div id="partyList" class="party"></div>
+      <p class="note" id="partyNote"></p>
+    </div>
+  </div>
+
+  <!-- components -->
+  <div class="pane" id="pane-components">
+    <div class="split">
+      <aside class="side">
+        <div class="side-head">
+          <select id="ecsFile"></select>
+          <input id="compFilter" type="search" placeholder="Filter components&hellip;">
+          <label class="chk"><input type="checkbox" id="chkPopulated" checked> Populated only</label>
+        </div>
+        <ul id="compList" class="list"></ul>
+      </aside>
+      <main class="detail">
+        <div id="compEmpty" class="empty">Pick a component to inspect its elements.</div>
+        <div id="compView" class="hidden">
+          <h2 id="compName"></h2>
+          <p class="mono dim" id="compMeta"></p>
+          <div class="editor-row">
+            <label>Byte offset</label><input id="fOffset" type="number" value="0" min="0">
+            <label>Type</label><select id="fKind"></select>
+            <label>Value</label><input id="fValue" type="text" placeholder="new value">
+            <button id="btnPatch" class="primary small">Patch selected row</button>
+          </div>
+          <div class="table-wrap"><table id="compTable"><thead><tr>
+            <th>#</th><th>bytes</th><th>int32</th><th>uint32</th><th>int64</th><th>float</th>
+          </tr></thead><tbody></tbody></table></div>
+          <div class="pager">
+            <button id="btnPrev" class="ghost small">&#8592; Prev</button>
+            <span id="pageInfo" class="dim"></span>
+            <button id="btnNext" class="ghost small">Next &#8594;</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- raw tree -->
+  <div class="pane" id="pane-tree">
+    <div class="split">
+      <aside class="side">
+        <div class="side-head">
+          <select id="treeFile"></select>
+          <input id="treeSearch" type="search" placeholder="Search nodes / values&hellip;">
+        </div>
+        <ul id="treeRoot" class="tree"></ul>
+      </aside>
+      <main class="detail">
+        <div id="nodeEmpty" class="empty">Select a node to see its attributes.</div>
+        <div id="nodeView" class="hidden">
+          <h2 id="nodeName"></h2>
+          <p class="mono dim" id="nodePath"></p>
+          <div class="table-wrap"><table id="attrTable"><thead><tr>
+            <th>attribute</th><th>type</th><th>value</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- files -->
+  <div class="pane" id="pane-files">
+    <div class="pane-inner">
+      <h2 class="section-title">Package contents</h2>
+      <div class="table-wrap"><table id="fileTable"><thead><tr>
+        <th>name</th><th>kind</th><th>uncompressed size</th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<div id="toast" class="toast hidden"></div>
+<div id="busy" class="busy hidden"><div class="spinner"></div><span id="busyText">Working&hellip;</span></div>
+
+<script src="app.js"></script>
+</body>
+</html>
